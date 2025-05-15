@@ -546,11 +546,133 @@ class UIComponents:
         status_text.empty()
 
 def main():
-    st.set_page_config(page_title="CV Optimizer Pro", layout="centered")
-    st.title("📄 CV Optimizer Pro")
-    st.write("Upload your CV (PDF or Word) - Supports English and Chinese")
+    # Page configuration
+    st.set_page_config(
+        page_title="CV Optimizer Pro",
+        layout="centered",
+        initial_sidebar_state="collapsed"
+    )
 
-    uploaded_file = st.file_uploader("Upload CV (PDF/DOCX)", type=["pdf", "docx"])
+    # Custom CSS for sleek design
+    st.markdown("""
+        <style>
+        .stApp {
+            background-color: #ffffff;
+        }
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1E88E5;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #424242;
+            margin-bottom: 1rem;
+        }
+        .feature-box {
+            background-color: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .feature-title {
+            color: #1E88E5;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .feature-text {
+            color: #424242;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .stButton > button {
+            width: 100%;
+            background-color: #1E88E5;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .stButton > button:hover {
+            background-color: #1976D2;
+        }
+        .results-container {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .intro-text {
+            color: #424242;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Header
+    st.markdown('<p class="main-title">📄 CV Optimizer Pro</p>', unsafe_allow_html=True)
+    st.markdown('<p class="subtitle">Transform your CV with AI-powered optimization</p>', unsafe_allow_html=True)
+
+    # Introduction
+    st.markdown("""
+        <p class="intro-text">
+        Welcome to CV Optimizer Pro, your intelligent assistant for creating professional, impactful CVs. 
+        Our AI-powered platform helps you transform your CV by enhancing content, improving language, 
+        and ensuring professional formatting.
+        </p>
+    """, unsafe_allow_html=True)
+
+    # Key Features Section
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+            <div class="feature-box">
+                <p class="feature-title">🤖 AI-Powered Enhancement</p>
+                <p class="feature-text">• Improves clarity and impact</p>
+                <p class="feature-text">• Enhances professional language</p>
+                <p class="feature-text">• Optimizes content structure</p>
+            </div>
+            <div class="feature-box">
+                <p class="feature-title">📊 Professional Scoring</p>
+                <p class="feature-text">• Detailed CV evaluation</p>
+                <p class="feature-text">• Actionable feedback</p>
+                <p class="feature-text">• Industry-standard metrics</p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+            <div class="feature-box">
+                <p class="feature-title">🌏 Bilingual Support</p>
+                <p class="feature-text">• English and Chinese support</p>
+                <p class="feature-text">• Professional translation</p>
+                <p class="feature-text">• Cultural adaptation</p>
+            </div>
+            <div class="feature-box">
+                <p class="feature-title">📝 Smart Formatting</p>
+                <p class="feature-text">• Clean, modern layout</p>
+                <p class="feature-text">• ATS-friendly format</p>
+                <p class="feature-text">• Multiple export options</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # How it works
+    st.markdown("""
+        <p class="feature-title" style="margin-top: 2rem;">How It Works:</p>
+        <p class="feature-text">1. Upload your CV in PDF or Word format</p>
+        <p class="feature-text">2. Our AI analyzes and enhances your content</p>
+        <p class="feature-text">3. Review improvements and feedback</p>
+        <p class="feature-text">4. Download your optimized CV</p>
+    """, unsafe_allow_html=True)
+
+    # File upload section
+    st.markdown('<div style="margin-top: 2rem;">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Upload your CV (PDF or Word)", type=["pdf", "docx"])
     
     if uploaded_file is not None:
         with st.spinner("Extracting content..."):
@@ -570,8 +692,11 @@ def main():
                     content = call_openai_prompt(prompt)
                     try:
                         structured_data = json.loads(content)
-                        st.subheader("🎯 Translated and Structured CV:")
+                        
+                        st.markdown('<div class="results-container">', unsafe_allow_html=True)
+                        st.subheader("🎯 Translated and Structured CV")
                         st.json(structured_data)
+                        st.markdown('</div>', unsafe_allow_html=True)
                         
                         # Generate PDF
                         pdf = PDF()
@@ -580,21 +705,24 @@ def main():
                         pdf_output = BytesIO()
                         pdf.output(pdf_output)
                         
-                        # Offer both PDF and structured data downloads
+                        # Download section
+                        st.subheader("⬇️ Download Options")
                         col1, col2 = st.columns(2)
                         with col1:
                             st.download_button(
                                 label="Download PDF CV",
                                 data=pdf_output.getvalue(),
                                 file_name="Translated_CV.pdf",
-                                mime="application/pdf"
+                                mime="application/pdf",
+                                use_container_width=True
                             )
                         with col2:
                             st.download_button(
                                 label="Download JSON Data",
                                 data=json.dumps(structured_data, indent=2),
                                 file_name="cv_data.json",
-                                mime="application/json"
+                                mime="application/json",
+                                use_container_width=True
                             )
                     except json.JSONDecodeError:
                         st.error("⚠️ Error in JSON formatting")
@@ -615,28 +743,35 @@ def main():
                     # Score the CV
                     score_result = call_openai_prompt(SCORE_PROMPT.replace("{cv_text}", polished))
                     
-                    # Display results
+                    # Display results in clean sections
+                    st.markdown('<div class="results-container">', unsafe_allow_html=True)
                     st.subheader("📝 Enhanced CV")
                     st.text_area("", polished, height=300)
+                    st.markdown('</div>', unsafe_allow_html=True)
                     
+                    st.markdown('<div class="results-container">', unsafe_allow_html=True)
                     st.subheader("📊 CV Score and Feedback")
                     st.text_area("", score_result, height=150)
+                    st.markdown('</div>', unsafe_allow_html=True)
                     
-                    # Download options
+                    # Download section
+                    st.subheader("⬇️ Download Options")
                     col1, col2 = st.columns(2)
                     with col1:
                         st.download_button(
                             label="Download PDF CV",
                             data=pdf_output.getvalue(),
                             file_name="Enhanced_CV.pdf",
-                            mime="application/pdf"
+                            mime="application/pdf",
+                            use_container_width=True
                         )
                     with col2:
                         st.download_button(
                             label="Download Text CV",
                             data=polished.encode("utf-8"),
                             file_name="Enhanced_CV.txt",
-                            mime="text/plain"
+                            mime="text/plain",
+                            use_container_width=True
                         )
                     
                     # Lead collection for low scores
@@ -647,16 +782,24 @@ def main():
                             if score < 7:
                                 st.markdown("---")
                                 st.warning("🎯 Your CV score is below 7/10. Consider our professional CV review service!")
-                                st.markdown("#### 📬 Leave your email for a personalized CV improvement consultation:")
-                                user_email = st.text_input("Enter your email:")
-                                if user_email:
-                                    lead = Lead()
-                                    lead.add_lead(user_email, score)
-                                    st.success(f"Thank you! We'll contact you within 24 hours at: {user_email}")
+                                with st.expander("Get Professional Help"):
+                                    st.markdown("#### 📬 Leave your email for a personalized CV improvement consultation")
+                                    user_email = st.text_input("Email address")
+                                    if user_email:
+                                        lead = Lead()
+                                        lead.add_lead(user_email, score)
+                                        st.success(f"Thank you! We'll contact you within 24 hours at: {user_email}")
                         except:
                             pass
         else:
             st.error("Could not extract text from the file.")
+
+    # Footer
+    st.markdown("""
+        <div style="text-align: center; margin-top: 3rem; padding: 1rem; color: #666;">
+            <p>Made with ❤️ by CV Optimizer Pro</p>
+        </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main() 
