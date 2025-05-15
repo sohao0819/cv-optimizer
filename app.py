@@ -13,6 +13,7 @@ import sqlite3
 from typing import Union
 from werkzeug.utils import secure_filename
 import time
+import re
 
 # Load environment variables
 load_dotenv()
@@ -120,6 +121,11 @@ def sanitize_text(text):
     text = ' '.join(text.split())  # Replace multiple spaces with single space
     
     return text
+
+def is_valid_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
 
 class Lead:
     def __init__(self, db_path="cv_optimizer.db"):
@@ -784,12 +790,23 @@ def main():
                                 st.warning("🎯 Your CV score is below 7/10. Consider our professional CV review service!")
                                 with st.expander("Get Professional Help"):
                                     st.markdown("#### 📬 Leave your email for a personalized CV improvement consultation")
-                                    user_email = st.text_input("Email address")
-                                    if user_email:
-                                        lead = Lead()
-                                        lead.add_lead(user_email, score)
-                                        st.success(f"Thank you! We'll contact you within 24 hours at: {user_email}")
-                        except:
+                                    user_email = st.text_input("Email address", key="email_input")
+                                    submit_button = st.button("Submit")
+                                    
+                                    if submit_button:
+                                        if not user_email:
+                                            st.error("Please enter your email address.")
+                                        elif not is_valid_email(user_email):
+                                            st.error("Please enter a valid email address.")
+                                        else:
+                                            try:
+                                                lead = Lead()
+                                                lead.add_lead(user_email, score)
+                                                st.success(f"Thank you! We'll contact you within 24 hours at: {user_email}")
+                                            except Exception as e:
+                                                st.error(f"Error saving your information. Please try again later. ({str(e)})")
+                        except Exception as e:
+                            st.error(f"Error processing score. Please try again later. ({str(e)})")
                             pass
         else:
             st.error("Could not extract text from the file.")
